@@ -115,4 +115,12 @@ if selected_section == "Analisis Penyewaan Interaktif":
             # Visualisasi: Histogram penyewaan
             fig, ax = plt.subplots(figsize=(10, 6))
             sns.histplot(filtered_data['cnt'], bins=20, kde=True, ax=ax, color='purple')
-            ax.
+            ax.set_title(f"Distribusi Penyewaan untuk {selected_weather} di {selected_season} pada {selected_hour}:00", fontsize=16)
+            ax.set_xlabel("Jumlah Penyewaan")
+            st.pyplot(fig)
+        else:
+            st.write("Tidak ada data untuk kombinasi yang dipilih.")
+
+# Footer
+st.sidebar.caption("Dashboard Penyewaan Sepeda oleh Andreansyah Budi")
+st.caption("Data dari Capital Bikeshare - Washington D.C.")
