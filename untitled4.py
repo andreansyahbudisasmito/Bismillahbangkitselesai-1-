@@ -80,36 +80,35 @@ if selected_section == "Penyewaan per Bulan":
     plt.xticks(rotation=45)
     st.pyplot(fig)
 
-# Penyewaan Harian Berdasarkan Hari, Bulan, Suhu, dan Kelembaban
+# Penyewaan Harian Berdasarkan Hari, Bulan, dan Cuaca
 if selected_section == "Penyewaan Harian":
-    st.subheader("Penyewaan Harian Berdasarkan Hari, Bulan, Suhu, dan Kelembaban")
+    st.subheader("Penyewaan Harian Berdasarkan Hari, Bulan, dan Cuaca")
 
     # Input hari dan bulan dari pengguna
     selected_day = st.selectbox("Pilih Hari:", bike_data['weekday'].unique(), format_func=lambda x: ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"][x])
     selected_month = st.selectbox("Pilih Bulan:", bike_data['mnth'].unique(), format_func=lambda x: ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"][x-1])
 
-    # Input suhu dan kelembaban dari pengguna
-    avg_temp = st.number_input("Masukkan Suhu Rata-rata (°C):", min_value=float(bike_data['temp'].min()), max_value=float(bike_data['temp'].max()))
-    avg_hum = st.number_input("Masukkan Kelembaban Rata-rata (%):", min_value=float(bike_data['hum'].min()), max_value=float(bike_data['hum'].max()))
+    # Input cuaca dari pengguna
+    selected_weather = st.selectbox("Pilih Cuaca:", ["Panas", "Normal", "Dingin"])
 
-    # Filter data berdasarkan hari, bulan, suhu dan kelembaban dengan toleransi
-    filtered_data = bike_data[
-        (bike_data['weekday'] == selected_day) & 
-        (bike_data['mnth'] == selected_month) & 
-        (bike_data['temp'].between(avg_temp - 1, avg_temp + 1)) &
-        (bike_data['hum'].between(avg_hum - 2, avg_hum + 2))
-    ]
+    # Filter data berdasarkan hari, bulan, dan cuaca
+    if selected_weather == "Panas":
+        filtered_data = bike_data[(bike_data['weekday'] == selected_day) & (bike_data['mnth'] == selected_month) & (bike_data['temp'] > 30)]
+    elif selected_weather == "Dingin":
+        filtered_data = bike_data[(bike_data['weekday'] == selected_day) & (bike_data['mnth'] == selected_month) & (bike_data['temp'] < 10)]
+    else:
+        filtered_data = bike_data[(bike_data['weekday'] == selected_day) & (bike_data['mnth'] == selected_month) & (bike_data['temp'].between(10, 30))]
 
     # Cek apakah ada data yang sesuai
     if not filtered_data.empty:
         # Rata-rata penyewaan harian berdasarkan filter
         avg_rentals = filtered_data["cnt"].mean()
-        st.write(f"**Rata-rata Penyewaan pada {selected_day}, Bulan {selected_month} dengan Suhu {avg_temp:.1f}°C dan Kelembaban {avg_hum:.1f}%:** {avg_rentals:.2f}")
+        st.write(f"**Rata-rata Penyewaan pada {selected_day}, Bulan {selected_month} dengan Cuaca {selected_weather}:** {avg_rentals:.2f}")
 
         # Plot grafik penyewaan harian
         fig, ax = plt.subplots(figsize=(8, 6))
         sns.barplot(x="dteday", y="cnt", data=filtered_data, palette="coolwarm", ax=ax)
-        ax.set_title(f"Penyewaan Sepeda pada Hari {selected_day}, Bulan {selected_month}", fontsize=14)
+        ax.set_title(f"Penyewaan Sepeda pada Hari {selected_day}, Bulan {selected_month} dengan Cuaca {selected_weather}", fontsize=14)
         ax.set_xlabel("Tanggal")
         ax.set_ylabel("Jumlah Penyewaan")
         plt.xticks(rotation=45)
