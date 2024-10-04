@@ -1,20 +1,12 @@
-# -*- coding: utf-8 -*-
 import streamlit as st
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-# Load dataset
+# Load data dari file CSV
 bike_data = pd.read_csv("day.csv")
 
-# Map weather and season data
-weather = {
-    1: "Clear",
-    2: "Mist",
-    3: "Light Rain",
-    4: "Heavy Rain"
-}
-
+# Mengubah data season jadi lebih gampang dibaca
 season = {
     1: "Spring",
     2: "Summer",
@@ -22,97 +14,90 @@ season = {
     4: "Winter"
 }
 
-bike_data["weather"] = bike_data["weathersit"].map(weather)
 bike_data["season"] = bike_data["season"].map(season)
 
-# Sidebar navigation
+# Navigasi sidebar buat milih analisis apa yang mau dilihat
 st.sidebar.title("Analisis Penyewaan Sepeda")
-sections = ["Overview", "Penyewaan per Musim", "Penyewaan per Bulan", "Penyewaan Harian"]
+sections = ["Overview", "Penyewaan Interaktif", "Analisis Penyewaan Harian"]
 selected_section = st.sidebar.radio("Pilih Analisis", sections)
 
-# Overview section
+# Bagian overview untuk kasih gambaran umum soal data
 if selected_section == "Overview":
-    st.header("Overview Data Penyewaan Sepeda")
-    st.write("Dashboard ini memberikan wawasan tentang penyewaan sepeda berdasarkan kondisi cuaca, musim, hari, dan jam.")
+    st.header("Gambaran Umum Data Penyewaan Sepeda")
+    st.write("Ini adalah dashboard yang kasih insight soal penyewaan sepeda berdasarkan cuaca, musim, hari, dan jam.")
     st.dataframe(bike_data)
 
-# Penyewaan per Musim
-if selected_section == "Penyewaan per Musim":
-    st.subheader("Penyewaan Sepeda Berdasarkan Musim")
+# Bagian interaktif, pengguna bisa pilih cuaca atau musim dan lihat penyewaannya
+if selected_section == "Penyewaan Interaktif":
+    st.header("Analisis Penyewaan Sepeda Berdasarkan Cuaca dan Musim")
 
-    # Select season
-    selected_season = st.selectbox("Pilih Musim:", bike_data['season'].unique())
+    # Input buat pilih musim atau cuaca yang mau dianalisis
+    selected_filter = st.radio("Pilih Filter:", ["Cuaca", "Musim"])
 
-    # Filter data by selected season
-    filtered_data = bike_data[bike_data["season"] == selected_season]
+    if selected_filter == "Cuaca":
+        selected_weather = st.selectbox("Pilih Cuaca:", ["Clear", "Mist", "Light Rain", "Heavy Rain"])
+        filtered_data = bike_data[bike_data["weather"] == selected_weather]
 
-    # Average rentals by season
-    avg_rentals = filtered_data["cnt"].mean()
-    st.write(f"**Rata-rata Penyewaan di Musim {selected_season}:** {avg_rentals:.2f}")
+        # Visualisasi penyewaan berdasarkan cuaca yang dipilih
+        if not filtered_data.empty:
+            st.write(f"Penyewaan Sepeda Saat Cuaca {selected_weather}")
+            fig, ax = plt.subplots(figsize=(10, 6))
+            sns.barplot(x="dteday", y="cnt", data=filtered_data, ax=ax, palette="coolwarm")
+            ax.set_title(f"Penyewaan Sepeda Berdasarkan Cuaca {selected_weather}", fontsize=14)
+            ax.set_ylabel("Jumlah Penyewaan")
+            plt.xticks(rotation=45)
+            st.pyplot(fig)
+        else:
+            st.warning("Data tidak ditemukan untuk cuaca yang dipilih.")
 
-    # Bar plot of rentals by season
-    fig, ax = plt.subplots(figsize=(8, 6))
-    sns.barplot(x="season", y="cnt", data=bike_data, palette="viridis", ax=ax)
-    ax.set_title("Penyewaan Sepeda per Musim", fontsize=14)
-    ax.set_ylabel("Jumlah Penyewaan")
-    st.pyplot(fig)
+    elif selected_filter == "Musim":
+        selected_season = st.selectbox("Pilih Musim:", bike_data['season'].unique())
+        filtered_data = bike_data[bike_data["season"] == selected_season]
 
-# Penyewaan per Bulan
-if selected_section == "Penyewaan per Bulan":
-    st.subheader("Penyewaan Sepeda Berdasarkan Bulan")
+        # Visualisasi penyewaan berdasarkan musim yang dipilih
+        if not filtered_data.empty:
+            st.write(f"Penyewaan Sepeda di Musim {selected_season}")
+            fig, ax = plt.subplots(figsize=(10, 6))
+            sns.lineplot(x="dteday", y="cnt", data=filtered_data, marker="o", ax=ax)
+            ax.set_title(f"Penyewaan Sepeda di Musim {selected_season}", fontsize=14)
+            ax.set_ylabel("Jumlah Penyewaan")
+            plt.xticks(rotation=45)
+            st.pyplot(fig)
+        else:
+            st.warning("Data tidak ditemukan untuk musim yang dipilih.")
 
-    # Select month
-    selected_month = st.selectbox("Pilih Bulan:", bike_data['mnth'].unique(), format_func=lambda x: ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"][x-1])
+# Bagian buat analisis harian, pengguna bisa input hari, bulan, suhu, kelembaban
+if selected_section == "Analisis Penyewaan Harian":
+    st.header("Analisis Penyewaan Harian")
 
-    # Filter data by selected month
-    filtered_data = bike_data[bike_data["mnth"] == selected_month]
+    # Input untuk hari, bulan, suhu, dan kelembaban
+    selected_day = st.number_input("Pilih Hari (1-31):", min_value=1, max_value=31, value=1)
+    selected_month = st.number_input("Pilih Bulan (1-12):", min_value=1, max_value=12, value=1)
+    avg_temp = st.number_input("Masukkan Suhu Rata-rata (°C):", min_value=-5.0, max_value=40.0, value=20.0)
+    avg_humidity = st.number_input("Masukkan Kelembaban Rata-rata (%):", min_value=0.0, max_value=100.0, value=50.0)
 
-    # Average rentals by month
-    avg_rentals = filtered_data["cnt"].mean()
-    st.write(f"**Rata-rata Penyewaan di Bulan {selected_month}:** {avg_rentals:.2f}")
+    # Filter data berdasarkan hari, bulan, suhu dan kelembaban yang dipilih dengan toleransi
+    filtered_data = bike_data[
+        (bike_data["mnth"] == selected_month) &
+        (bike_data["dteday"].str.split('-').str[2].astype(int) == selected_day) &
+        (bike_data["temp"] >= (avg_temp - 1)) & (bike_data["temp"] <= (avg_temp + 1)) &
+        (bike_data["hum"] >= (avg_humidity - 2)) & (bike_data["hum"] <= (avg_humidity + 2))
+    ]
 
-    # Line plot of rentals by month
-    fig, ax = plt.subplots(figsize=(8, 6))
-    sns.lineplot(x="dteday", y="cnt", data=filtered_data, marker="o", palette="coolwarm")
-    ax.set_title(f"Penyewaan Sepeda di Bulan {selected_month}", fontsize=14)
-    ax.set_xlabel("Tanggal")
-    ax.set_ylabel("Jumlah Penyewaan")
-    plt.xticks(rotation=45)
-    st.pyplot(fig)
-
-# Penyewaan Harian
-if selected_section == "Penyewaan Harian":
-    st.subheader("Penyewaan Sepeda Berdasarkan Hari")
-
-    # Input for day, month, temperature, and humidity
-    selected_day = st.number_input("Masukkan Hari (1-31):", min_value=1, max_value=31)
-    selected_month = st.number_input("Masukkan Bulan (1-12):", min_value=1, max_value=12)
-    selected_temp = st.number_input("Masukkan Suhu (Celsius):")
-    selected_hum = st.number_input("Masukkan Kelembaban (%):")
-
-    # Filter data for the specific day and month
-    filtered_data = bike_data[(bike_data["dteday"].str.contains(f"-{selected_month:02d}-{selected_day:02d}")) &
-                               (bike_data["temp"] >= selected_temp - 5) & 
-                               (bike_data["temp"] <= selected_temp + 5) & 
-                               (bike_data["hum"] >= selected_hum - 10) & 
-                               (bike_data["hum"] <= selected_hum + 10)]
-
-    # Average rentals for the selected day and month
+    # Cek apakah ada data yang cocok dengan filter, kalau ada tampilkan grafisnya
     if not filtered_data.empty:
-        avg_rentals = filtered_data["cnt"].mean()
-        st.write(f"**Rata-rata Penyewaan di Hari {selected_day} Bulan {selected_month}:** {avg_rentals:.2f}")
+        st.write(f"Hasil filter untuk Hari {selected_day}, Bulan {selected_month}, Suhu ~ {avg_temp}°C, Kelembaban ~ {avg_humidity}%:")
 
-        # Line plot of daily rentals
-        fig, ax = plt.subplots(figsize=(8, 6))
-        sns.lineplot(x="dteday", y="cnt", data=filtered_data, marker="o", palette="plasma")
-        ax.set_title(f"Penyewaan Harian untuk Suhu {selected_temp}°C dan Kelembaban {selected_hum}%", fontsize=14)
-        ax.set_xlabel("Tanggal")
+        # Visualisasi penyewaan harian
+        fig, ax = plt.subplots(figsize=(10, 6))
+        sns.barplot(x="dteday", y="cnt", data=filtered_data, palette="coolwarm", ax=ax)
+        ax.set_title(f"Penyewaan Harian pada {selected_day}/{selected_month} dengan Suhu ~ {avg_temp}°C dan Kelembaban ~ {avg_humidity}%", fontsize=14)
         ax.set_ylabel("Jumlah Penyewaan")
         plt.xticks(rotation=45)
         st.pyplot(fig)
     else:
-        st.write("Tidak ada data yang sesuai dengan parameter yang diberikan.")
+        st.warning("Data tidak ditemukan dengan kriteria yang dipilih. Coba sesuaikan nilai suhu atau kelembaban.")
 
-# Footer
+# Footer kecil buat info
 st.sidebar.caption("Dashboard Penyewaan Sepeda oleh Andreansyah Budi")
 st.caption("Data dari Capital Bikeshare - Washington D.C.")
