@@ -21,6 +21,7 @@ season = {
     4: "Musim Dingin"
 }
 
+# Menambahkan kolom baru untuk cuaca dan musim
 bike_data["weather"] = bike_data["weathersit"].map(weather)
 bike_data["season"] = bike_data["season"].map(season)
 
@@ -86,27 +87,32 @@ if selected_section == "Penyewaan per Jam dan Musim":
 if selected_section == "Analisis Penyewaan Interaktif":
     st.subheader("Analisis Penyewaan yang Interaktif")
 
-    # Buat form untuk input pengguna
-    with st.form(key='rental_form'):
+    # Form untuk memilih kondisi analisis
+    with st.form(key='interactive_analysis_form'):
+        st.write("Pilih Kriteria untuk Analisis:")
+        
+        # Pilih tahun dan bulan
+        selected_year = st.selectbox("Pilih Tahun:", bike_data['yr'].unique())
+        selected_month = st.selectbox("Pilih Bulan:", bike_data['mnth'].unique())
+        
+        # Pilih kondisi cuaca
         selected_weather = st.selectbox("Pilih Kondisi Cuaca:", bike_data['weather'].unique())
-        selected_season = st.selectbox("Pilih Musim:", bike_data['season'].unique())
-        selected_hour = st.slider("Pilih Jam (0-23):", 0, 23, 12)
-
+        
         # Tombol submit
-        submit_button = st.form_submit_button(label='Analisis Penyewaan')
+        submit_button = st.form_submit_button(label='Lihat Analisis')
 
     if submit_button:
         # Filter data berdasarkan input pengguna
         filtered_data = bike_data[
-            (bike_data['weather'] == selected_weather) &
-            (bike_data['season'] == selected_season) &
-            (bike_data['hr'] == selected_hour)
+            (bike_data['yr'] == selected_year) &
+            (bike_data['mnth'] == selected_month) &
+            (bike_data['weather'] == selected_weather)
         ]
 
         # Menampilkan rata-rata penyewaan
         if not filtered_data.empty:
             avg_rentals = filtered_data['cnt'].mean()
-            st.write(f"**Rata-rata Penyewaan untuk {selected_weather} di {selected_season} pada {selected_hour}:00:** {avg_rentals:.2f}")
+            st.write(f"**Rata-rata Penyewaan untuk {selected_weather} pada bulan {selected_month} tahun {selected_year}:** {avg_rentals:.2f}")
 
             # Tampilkan data penyewaan yang detail
             st.write("Data Penyewaan yang Detail:")
@@ -115,7 +121,7 @@ if selected_section == "Analisis Penyewaan Interaktif":
             # Visualisasi: Histogram penyewaan
             fig, ax = plt.subplots(figsize=(10, 6))
             sns.histplot(filtered_data['cnt'], bins=20, kde=True, ax=ax, color='purple')
-            ax.set_title(f"Distribusi Penyewaan untuk {selected_weather} di {selected_season} pada {selected_hour}:00", fontsize=16)
+            ax.set_title(f"Distribusi Penyewaan untuk {selected_weather} pada bulan {selected_month} tahun {selected_year}", fontsize=16)
             ax.set_xlabel("Jumlah Penyewaan")
             st.pyplot(fig)
         else:
