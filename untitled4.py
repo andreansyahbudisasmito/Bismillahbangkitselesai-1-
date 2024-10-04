@@ -60,8 +60,6 @@ if selected_section == "Penyewaan per Musim":
 # Penyewaan per Bulan
 if selected_section == "Penyewaan per Bulan":
     st.subheader("Penyewaan Sepeda Berdasarkan Bulan")
-    st.write("Silahkan pilih grafik yang ingin anda munculkan berdasarkan variabel berikut:")
-    st.markdown('<span style="color:red">Note: ketika plot tidak muncul atau muncul sebagian berarti tidak ada data pada variabel yang anda masukan</span>', unsafe_allow_html=True)
 
     # Select month
     selected_month = st.selectbox("Pilih Bulan:", bike_data['mnth'].unique(), format_func=lambda x: ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"][x-1])
@@ -85,6 +83,9 @@ if selected_section == "Penyewaan per Bulan":
 # Penyewaan Harian Berdasarkan Hari, Bulan, dan Cuaca
 if selected_section == "Penyewaan Harian":
     st.subheader("Penyewaan Harian Berdasarkan Hari, Bulan, dan Cuaca")
+    st.write("Silahkan pilih grafik yang ingin anda munculkan berdasarkan variabel berikut:")
+    st.markdown('<span style="color:red">Note: ketika plot tidak muncul atau muncul sebagian berarti tidak ada data pada variabel yang anda masukan</span>', unsafe_allow_html=True)
+
 
     # Input hari dan bulan dari pengguna
     selected_day = st.selectbox("Pilih Hari:", bike_data['weekday'].unique(), format_func=lambda x: ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"][x])
