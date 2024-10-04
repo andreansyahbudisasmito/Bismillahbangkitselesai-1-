@@ -93,11 +93,11 @@ if selected_section == "Penyewaan Harian":
 
     # Filter data berdasarkan hari, bulan, dan cuaca
     if selected_weather == "Panas":
-        filtered_data = bike_data[(bike_data['weekday'] == selected_day) & (bike_data['mnth'] == selected_month) & (bike_data['temp'] > 30)]
+        filtered_data = bike_data[(bike_data['weekday'] == selected_day) & (bike_data['mnth'] == selected_month) & (bike_data['temp'] > 0.3)]
     elif selected_weather == "Dingin":
-        filtered_data = bike_data[(bike_data['weekday'] == selected_day) & (bike_data['mnth'] == selected_month) & (bike_data['temp'] < 10)]
+        filtered_data = bike_data[(bike_data['weekday'] == selected_day) & (bike_data['mnth'] == selected_month) & (bike_data['temp'] < 0.1)]
     else:
-        filtered_data = bike_data[(bike_data['weekday'] == selected_day) & (bike_data['mnth'] == selected_month) & (bike_data['temp'].between(10, 30))]
+        filtered_data = bike_data[(bike_data['weekday'] == selected_day) & (bike_data['mnth'] == selected_month) & (bike_data['temp'].between(0.1, 0.3))]
 
     # Cek apakah ada data yang sesuai
     if not filtered_data.empty:
