@@ -92,5 +92,3 @@ if selected_section == "Rentals by Season and Hour":
 # Footer
 st.sidebar.caption("Bike Rental Dashboard by Andreansyah Budi")
 st.caption("Data from Capital Bikeshare - Washington D.C.")
-
-pip install streamlit
